@@ -13,7 +13,7 @@ timer mfree_timer;
 // struct to make header access easier
 struct header
 {
-    //have 32 bytes to work with, this is 30
+    //have 32 bytes to work with, this is 31
     header *nextBlock;
     header *lastBlock;
     void *nextAlloc;
@@ -23,7 +23,14 @@ struct header
     uint8_t maxFree;
     char sz;
 };
-
+//31 byte header for tagged bigAllocs. Signal char should be in same place, so can be accessed correctly using either header struct
+struct bigHeader
+{
+    uint64_t allocSize;
+    void* dataStart; 
+    const char PADDING[14];
+    char sz; 
+};
 // array holding pointers to first superblock (page) of each bucket
 //{nullptr} initializes all ptrs to nullptr
 void *freeBlocks[BUCKETS] = {nullptr};
@@ -35,10 +42,24 @@ const uint64_t pageMask = 0xfffffffff000;
 uint16_t extraBlocks = 0;
 uint64_t requested = 0;
 uint64_t allocated = 0;
+uint64_t largeAllocated;
+uint64_t largeRequested; 
 
-void* largeAlloc(size_t size)
+void* largeAlloc(size_t &size)
 {
-    
+    size += HEADERSIZE;
+    void* blockPtr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    bigHeader* head = (bigHeader*)blockPtr;
+    head->allocSize = size;
+    head->dataStart = (void*)((char*)blockPtr + HEADERSIZE);
+    head->sz = 'L';
+    return head->dataStart;
+}
+void largeFree(void* blockPtr)
+{
+    bigHeader* tag = (bigHeader*)blockPtr;
+    munmap(blockPtr, tag->allocSize);
+    return;
 }
 void freeBlock(header *block)
 {
@@ -148,6 +169,8 @@ void *allocate(void *&bucketHead, uint16_t &allocSize, bool newBlock)
 }
 void *mmalloc(size_t size)
 {
+    mmalloc_timer.start();
+    void *ptr;
     // determine which bucket to put allocation in
     if (size <= PAGESIZE/2)
     {
@@ -166,76 +189,106 @@ void *mmalloc(size_t size)
             createdBlock = true; 
         }
         // perform allocation
-        void *ptr = allocate(freeBlocks[bucket], allocSize, createdBlock);
-        return ptr;
+        ptr = allocate(freeBlocks[bucket], allocSize, createdBlock);
     }
     else
     {
-
+        ptr = largeAlloc(size);
     }
+    mmalloc_timer.stop();
+    return ptr; 
 }
 
 void mfree(void *ptr)
 {
+    mfree_timer.start();
     // perform deallocation
     void *thisBlock = (void *)((uint64_t)ptr & pageMask);
     header *blockHeader = (header *)thisBlock;
-    void **alloc = (void **)ptr;
-    *alloc = blockHeader->nextAlloc;
-    blockHeader->nextAlloc = ptr;
-    (blockHeader->freeCount)++;
-    if (blockHeader->freeCount == 1)
-        swapBlock(blockHeader);
-    if (blockHeader->freeCount == blockHeader->maxFree && extraBlocks == RETAIN_FREE_SUPERBLOCK_COUNT)
-        freeBlock(blockHeader);
-    else if (blockHeader->freeCount == blockHeader->maxFree)
-        extraBlocks++; 
+    if (blockHeader->sz == 'S')
+    {
+        void **alloc = (void **)ptr;
+        *alloc = blockHeader->nextAlloc;
+        blockHeader->nextAlloc = ptr;
+        (blockHeader->freeCount)++;
+        if (blockHeader->freeCount == 1)
+            swapBlock(blockHeader);
+        if (blockHeader->freeCount == blockHeader->maxFree && extraBlocks == RETAIN_FREE_SUPERBLOCK_COUNT)
+            freeBlock(blockHeader);
+        else if (blockHeader->freeCount == blockHeader->maxFree)
+            extraBlocks++; 
+    }
+    else
+    {
+        largeFree(thisBlock);
+    }
+    mfree_timer.stop();
     return;
 }
+void largeStats()
+{
+    cout << "Large Allocations: " << endl;
+}
+void smallStats()
+{
+    cout << "Small Allocations: " << endl;
+    if (allocated != 0)
+    {
+        double iFrag = ((long double)(allocated - requested)) / allocated;
+        uint64_t unusedSpace = 0;
+        for (int i = 0; i < BUCKETS; i++)
+        {
+            uint32_t blocksAlloc = 0;
+            uint32_t blocksFree = 0;
+            uint32_t allocsUsed = 0;
+            uint32_t allocsFree = 0;
+            header* blockPtr = (header *)freeBlocks[i];
+            while (blockPtr)
+            {
+                if (blockPtr->freeCount == blockPtr->maxFree)
+                    blocksFree++;
+                else
+                    blocksAlloc++;
 
+                allocsFree += blockPtr->freeCount;
+                allocsUsed += (blockPtr->maxFree - blockPtr->freeCount);
+                blockPtr = blockPtr->nextBlock;
+            }
+            blockPtr = (header*)fullBlocks[i];
+            while (blockPtr)
+            {
+                if (blockPtr->freeCount == blockPtr->maxFree)
+                    blocksFree++;
+                else
+                    blocksAlloc++;
+
+                allocsFree += blockPtr->freeCount;
+                allocsUsed += (blockPtr->maxFree - blockPtr->freeCount);
+                blockPtr = blockPtr->nextBlock;
+            }
+            unusedSpace += (allocsFree * sizes[i]);
+
+            cout << sizes[i] << "B Allocations:" << endl
+                << "Superblocks Allocated: " << blocksAlloc << endl
+                << "SuperBlocks Free: " << blocksFree << endl
+                << "Total Allocated: " << allocsUsed << endl
+                << "Allocations Free: " << allocsFree << endl
+                << endl;
+        }
+        cout << "Unused Allocated Space: " << unusedSpace << endl
+            << "Internal Fragmentation: " << iFrag << endl;
+        return;
+    }
+    else
+    {
+        cout << "Internal Fragmentation: N/A" << endl;
+    }
+}
 void mstats()
 {
-    double iFrag = ((long double)(allocated - requested)) / allocated;
-    uint64_t unusedSpace = 0;
-    for (int i = 0; i < BUCKETS; i++)
-    {
-        uint32_t blocksAlloc = 0;
-        uint32_t blocksFree = 0;
-        uint32_t allocsUsed = 0;
-        uint32_t allocsFree = 0;
-        header* blockPtr = (header *)freeBlocks[i];
-        while (blockPtr)
-        {
-            if (blockPtr->freeCount == blockPtr->maxFree)
-                blocksFree++;
-            else
-                blocksAlloc++;
-
-            allocsFree += blockPtr->freeCount;
-            allocsUsed += (blockPtr->maxFree - blockPtr->freeCount);
-            blockPtr = blockPtr->nextBlock;
-        }
-        blockPtr = (header*)fullBlocks[i];
-        while (blockPtr)
-        {
-            if (blockPtr->freeCount == blockPtr->maxFree)
-                blocksFree++;
-            else
-                blocksAlloc++;
-
-            allocsFree += blockPtr->freeCount;
-            allocsUsed += (blockPtr->maxFree - blockPtr->freeCount);
-            blockPtr = blockPtr->nextBlock;
-        }
-        unusedSpace += (allocsFree * sizes[i]);
-
-        cout << sizes[i] << "B Allocations:" << endl
-             << "Superblocks Allocated: " << blocksAlloc << endl
-             << "SuperBlocks Free: " << blocksFree << endl
-             << "Total Allocated: " << allocsUsed << endl
-             << "Allocations Free: " << allocsFree << endl
-             << endl;
-    }
-    cout << "Unused Allocated Space: " << unusedSpace << endl
-         << "Internal Fragmentation: " << iFrag << endl;
+    largeStats();
+    smallStats();
+    cout << "Total mmalloc time: " << mmalloc_timer.total_time() << endl;
+    cout << "Total mfree time: " << mfree_timer.total_time() << endl;
+    cout << "Total time spent in malloc: " << mfree_timer.total_time() + mmalloc_timer.total_time() << endl;
 }

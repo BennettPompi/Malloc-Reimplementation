@@ -32,6 +32,7 @@ int main(int argc, char ** argv) {
     int max_allocation = MAX_ALLOC;
     int run_allocs = NUM_ALLOCS;
     int fuzz_runs = FUZZ_RUNS;
+
     if (argc > 1) {
         // argc at least 2
         if (!strcmp(argv[1], "-h")) {
@@ -132,6 +133,9 @@ int main(int argc, char ** argv) {
 
     mstats();
 
+    mmalloc_timer.reset();
+    mfree_timer.reset();
+
     cout << endl << endl << endl;
 
     cout << "==> Sabotage testing" << endl;
@@ -166,6 +170,8 @@ int main(int argc, char ** argv) {
     }
 
     mstats();
+    mmalloc_timer.reset();
+    mfree_timer.reset();
     cout << endl;
 
     //mprint();
@@ -217,6 +223,8 @@ int main(int argc, char ** argv) {
 
 
     mstats();
+    mmalloc_timer.reset();
+    mfree_timer.reset();
     cout << endl;
 
     

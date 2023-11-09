@@ -13,7 +13,7 @@
 #define RETAIN_FREE_SUPERBLOCK_COUNT 4
 #define BUCKETS 7
 #define MIN_SIZE 32
-
+#define HEADERSIZE 32
 void * mmalloc (size_t __size);
 void mfree(void*);
 void mstats();
