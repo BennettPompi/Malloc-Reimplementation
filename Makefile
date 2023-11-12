@@ -57,10 +57,10 @@ RM = /usr/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/bip7/bip7-malloc-tagged
+CMAKE_SOURCE_DIR = /home/bip7/bip7-malloc-indexed
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/bip7/bip7-malloc-tagged
+CMAKE_BINARY_DIR = /home/bip7/bip7-malloc-indexed
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/bip7/bip7-malloc-tagged/CMakeFiles /home/bip7/bip7-malloc-tagged//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/bip7/bip7-malloc-indexed/CMakeFiles /home/bip7/bip7-malloc-indexed//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/bip7/bip7-malloc-tagged/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/bip7/bip7-malloc-indexed/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -117,24 +117,24 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named bip7-malloc-tagged
+# Target rules for targets named bip7-malloc-indexed
 
 # Build rule for target.
-bip7-malloc-tagged: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 bip7-malloc-tagged
-.PHONY : bip7-malloc-tagged
+bip7-malloc-indexed: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 bip7-malloc-indexed
+.PHONY : bip7-malloc-indexed
 
 # fast build rule for target.
-bip7-malloc-tagged/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/build
-.PHONY : bip7-malloc-tagged/fast
+bip7-malloc-indexed/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/build
+.PHONY : bip7-malloc-indexed/fast
 
 TestEntry.o: TestEntry.cpp.o
 .PHONY : TestEntry.o
 
 # target to build an object file
 TestEntry.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/TestEntry.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/TestEntry.cpp.o
 .PHONY : TestEntry.cpp.o
 
 TestEntry.i: TestEntry.cpp.i
@@ -142,7 +142,7 @@ TestEntry.i: TestEntry.cpp.i
 
 # target to preprocess a source file
 TestEntry.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/TestEntry.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/TestEntry.cpp.i
 .PHONY : TestEntry.cpp.i
 
 TestEntry.s: TestEntry.cpp.s
@@ -150,7 +150,7 @@ TestEntry.s: TestEntry.cpp.s
 
 # target to generate assembly for a file
 TestEntry.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/TestEntry.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/TestEntry.cpp.s
 .PHONY : TestEntry.cpp.s
 
 main.o: main.cpp.o
@@ -158,7 +158,7 @@ main.o: main.cpp.o
 
 # target to build an object file
 main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/main.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/main.cpp.o
 .PHONY : main.cpp.o
 
 main.i: main.cpp.i
@@ -166,7 +166,7 @@ main.i: main.cpp.i
 
 # target to preprocess a source file
 main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/main.cpp.i
 .PHONY : main.cpp.i
 
 main.s: main.cpp.s
@@ -174,7 +174,7 @@ main.s: main.cpp.s
 
 # target to generate assembly for a file
 main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/main.cpp.s
 .PHONY : main.cpp.s
 
 malloc.o: malloc.cpp.o
@@ -182,7 +182,7 @@ malloc.o: malloc.cpp.o
 
 # target to build an object file
 malloc.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/malloc.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/malloc.cpp.o
 .PHONY : malloc.cpp.o
 
 malloc.i: malloc.cpp.i
@@ -190,7 +190,7 @@ malloc.i: malloc.cpp.i
 
 # target to preprocess a source file
 malloc.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/malloc.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/malloc.cpp.i
 .PHONY : malloc.cpp.i
 
 malloc.s: malloc.cpp.s
@@ -198,7 +198,7 @@ malloc.s: malloc.cpp.s
 
 # target to generate assembly for a file
 malloc.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/malloc.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/malloc.cpp.s
 .PHONY : malloc.cpp.s
 
 timer.o: timer.cpp.o
@@ -206,7 +206,7 @@ timer.o: timer.cpp.o
 
 # target to build an object file
 timer.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/timer.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/timer.cpp.o
 .PHONY : timer.cpp.o
 
 timer.i: timer.cpp.i
@@ -214,7 +214,7 @@ timer.i: timer.cpp.i
 
 # target to preprocess a source file
 timer.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/timer.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/timer.cpp.i
 .PHONY : timer.cpp.i
 
 timer.s: timer.cpp.s
@@ -222,7 +222,7 @@ timer.s: timer.cpp.s
 
 # target to generate assembly for a file
 timer.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-tagged.dir/build.make CMakeFiles/bip7-malloc-tagged.dir/timer.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/timer.cpp.s
 .PHONY : timer.cpp.s
 
 # Help Target
@@ -233,7 +233,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... bip7-malloc-tagged"
+	@echo "... bip7-malloc-indexed"
 	@echo "... TestEntry.o"
 	@echo "... TestEntry.i"
 	@echo "... TestEntry.s"
