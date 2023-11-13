@@ -97,10 +97,12 @@ void allocMap::resizeUp()
 {
     uint64_t oldCap = this->cap;
     this->cap *= 2; 
+    this->mmapCalls ++; 
     alloc** tmp = (alloc**)mmap(nullptr, this->cap*(sizeof(alloc)), 
                         PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     
     this->rehash(tmp, oldCap);
+    this->unmapCalls++;
     munmap((void*)(this->table), (oldCap*sizeof(alloc*)));
     this->table = tmp;
 }
@@ -108,9 +110,11 @@ void allocMap::resizeDown()
 {
     uint64_t oldCap = this->cap;
     this->cap /= 2; 
+    this->mmapCalls++;
     alloc** tmp = (alloc**)mmap(nullptr, this->cap*(sizeof(alloc)), 
                         PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     this->rehash(tmp, oldCap);
+    this->unmapCalls++;
     munmap(this->table, cap*sizeof(alloc));
     this->table = tmp;
 }

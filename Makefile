@@ -153,6 +153,54 @@ TestEntry.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/TestEntry.cpp.s
 .PHONY : TestEntry.cpp.s
 
+allocMap.o: allocMap.cpp.o
+.PHONY : allocMap.o
+
+# target to build an object file
+allocMap.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/allocMap.cpp.o
+.PHONY : allocMap.cpp.o
+
+allocMap.i: allocMap.cpp.i
+.PHONY : allocMap.i
+
+# target to preprocess a source file
+allocMap.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/allocMap.cpp.i
+.PHONY : allocMap.cpp.i
+
+allocMap.s: allocMap.cpp.s
+.PHONY : allocMap.s
+
+# target to generate assembly for a file
+allocMap.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/allocMap.cpp.s
+.PHONY : allocMap.cpp.s
+
+largeMalloc.o: largeMalloc.cpp.o
+.PHONY : largeMalloc.o
+
+# target to build an object file
+largeMalloc.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/largeMalloc.cpp.o
+.PHONY : largeMalloc.cpp.o
+
+largeMalloc.i: largeMalloc.cpp.i
+.PHONY : largeMalloc.i
+
+# target to preprocess a source file
+largeMalloc.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/largeMalloc.cpp.i
+.PHONY : largeMalloc.cpp.i
+
+largeMalloc.s: largeMalloc.cpp.s
+.PHONY : largeMalloc.s
+
+# target to generate assembly for a file
+largeMalloc.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/largeMalloc.cpp.s
+.PHONY : largeMalloc.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -201,6 +249,30 @@ malloc.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/malloc.cpp.s
 .PHONY : malloc.cpp.s
 
+smallMalloc.o: smallMalloc.cpp.o
+.PHONY : smallMalloc.o
+
+# target to build an object file
+smallMalloc.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/smallMalloc.cpp.o
+.PHONY : smallMalloc.cpp.o
+
+smallMalloc.i: smallMalloc.cpp.i
+.PHONY : smallMalloc.i
+
+# target to preprocess a source file
+smallMalloc.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/smallMalloc.cpp.i
+.PHONY : smallMalloc.cpp.i
+
+smallMalloc.s: smallMalloc.cpp.s
+.PHONY : smallMalloc.s
+
+# target to generate assembly for a file
+smallMalloc.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bip7-malloc-indexed.dir/build.make CMakeFiles/bip7-malloc-indexed.dir/smallMalloc.cpp.s
+.PHONY : smallMalloc.cpp.s
+
 timer.o: timer.cpp.o
 .PHONY : timer.o
 
@@ -237,12 +309,21 @@ help:
 	@echo "... TestEntry.o"
 	@echo "... TestEntry.i"
 	@echo "... TestEntry.s"
+	@echo "... allocMap.o"
+	@echo "... allocMap.i"
+	@echo "... allocMap.s"
+	@echo "... largeMalloc.o"
+	@echo "... largeMalloc.i"
+	@echo "... largeMalloc.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
 	@echo "... malloc.o"
 	@echo "... malloc.i"
 	@echo "... malloc.s"
+	@echo "... smallMalloc.o"
+	@echo "... smallMalloc.i"
+	@echo "... smallMalloc.s"
 	@echo "... timer.o"
 	@echo "... timer.i"
 	@echo "... timer.s"
