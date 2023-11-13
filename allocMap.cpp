@@ -1,58 +1,120 @@
 #include "allocMap.h"
 
+uint64_t hash(uint64_t x) 
+{
+    x = (x ^ (x >> 30)) * UINT64_C(0xbf58476d1ce4e5b9);
+    x = (x ^ (x >> 27)) * UINT64_C(0x94d049bb133111eb);
+    x = x ^ (x >> 31);
+    return x;
+}
 allocMap::allocMap()
 {
-    this->cap = PAGESIZE/sizeof(alloc);
+    this->cap = ((16*PAGESIZE)/sizeof(alloc*));
     this->size = 0;
-    this->table = (alloc*) mmap(nullptr, PAGESIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    this->table = (alloc**) mmap(nullptr, PAGESIZE*16, PROT_READ | 
+                            PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 }
-uint32_t allocMap::index(void* addr)
+uint64_t allocMap::index(void* addr)
 {
-    return hash<uint64_t>{}((uint64_t)addr)%this->cap;
+    uint64_t index = hash((uint64_t) addr);
+    index = index % this->cap; 
+    return index;
 }
-void allocMap::add(void* addr, uint64_t size, alloc* tbl)
+void allocMap::add(void* addr, uint64_t size, alloc** tbl)
 {
     uint32_t index = this->index(addr);
-    alloc currAlloc = tbl[index];
-    if (currAlloc.thisAlloc)
+    alloc** head = tbl + index;
+    alloc* currAlloc = *head; 
+    if (currAlloc)
     {
-        while(currAlloc.nextAlloc)
+        while(currAlloc->nextAlloc)
         {
-            currAlloc = *currAlloc.nextAlloc;
+            currAlloc = currAlloc->nextAlloc;
         }
         alloc* tmp = (alloc*)smallMalloc(sizeof(alloc));
         tmp->allocSize = size;
         tmp->thisAlloc = addr;
         tmp->nextAlloc = nullptr; 
-        currAlloc.nextAlloc = tmp;
+        tmp->lastAlloc = currAlloc;
+        currAlloc->nextAlloc = tmp;
     }
     else
     {
-        currAlloc.allocSize = size;
-        currAlloc.thisAlloc = addr;
+        currAlloc = (alloc*)smallMalloc(sizeof(alloc));
+        currAlloc->allocSize = size;
+        currAlloc->thisAlloc = addr;
+        currAlloc->nextAlloc = nullptr; 
+        currAlloc->lastAlloc = nullptr;
+        *head = currAlloc; 
     }
     this->size++;
-    if (this->size/this->cap > .75)
-        this->resize();
+    if (this->size/this->cap > MAX_LOAD)
+        this->resizeUp();
 }
-void allocMap::resize()
+void allocMap::recMove(alloc* a, alloc** newTable)
 {
-    alloc* tmp = (alloc*)mmap(nullptr, this->cap*2*sizeof(alloc), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    for (int i = 0; i < cap; i++)
+    if (!a->nextAlloc)
     {
-        alloc* curr = tmp + i;
-        if (curr->thisAlloc)
-        {
-            this->add(curr->thisAlloc, curr->allocSize, tmp);
-            if (curr->nextAlloc)
-                this->listDestruct(curr->nextAlloc, tmp);
-        }
+        this->moveExisting(a, newTable);
+        return;
     }
+    this->recMove(a->nextAlloc, newTable);
+    this->moveExisting(a, newTable);
+    return;
+}
+void allocMap::moveExisting(alloc* a, alloc** newTable)
+{
+    uint64_t index = this->index(a->thisAlloc);
+    alloc** head = newTable + index;
+    a->lastAlloc = nullptr;
+    a->nextAlloc = nullptr; 
+    alloc* curr = *head;
+    if (! curr)
+    {
+        *head = a; 
+    }
+    else
+    {
+        while(curr->nextAlloc)
+            curr = curr->nextAlloc;
+        curr->nextAlloc = a;
+        a->lastAlloc = curr; 
+    }
+}
+void allocMap::rehash(alloc** tmp, uint64_t &oldCap)
+{
+    alloc** curr = this->table;
+    for (int i = 0; i < oldCap; i++)
+    {
+        if (*curr)
+        {
+            recMove(*curr, tmp);
+        }
+        curr++; 
+    }
+}
+void allocMap::resizeUp()
+{
+    uint64_t oldCap = this->cap;
+    this->cap *= 2; 
+    alloc** tmp = (alloc**)mmap(nullptr, this->cap*(sizeof(alloc)), 
+                        PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    
+    this->rehash(tmp, oldCap);
+    munmap((void*)(this->table), (oldCap*sizeof(alloc*)));
+    this->table = tmp;
+}
+void allocMap::resizeDown()
+{
+    uint64_t oldCap = this->cap;
+    this->cap /= 2; 
+    alloc** tmp = (alloc**)mmap(nullptr, this->cap*(sizeof(alloc)), 
+                        PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    this->rehash(tmp, oldCap);
     munmap(this->table, cap*sizeof(alloc));
     this->table = tmp;
-    cap *= 2;
 }
-void allocMap::listDestruct(alloc* a, alloc* newTable = nullptr)
+void allocMap::listDestruct(alloc* a, alloc** newTable = nullptr)
 {
     if(newTable)
         this->add(a->thisAlloc,a->allocSize, newTable);
@@ -65,58 +127,64 @@ void allocMap::listDestruct(alloc* a, alloc* newTable = nullptr)
     smallFree(a);
     return; 
 }
-bool allocMap::remove(void* addr)
+uint64_t allocMap::remove(void* addr)
 {
     //written by copilot (wow lol)
     uint32_t index = this->index(addr);
-    alloc currAlloc = this->table[index];
+    alloc** head = this->table + index;
+    alloc* curr = *head;
+    uint32_t ret = 0; 
     //if there is an alloc in this space, search it for addr
-    if (currAlloc.thisAlloc)
+    if (curr)
     {
         //if the first alloc is the one we want to remove, remove it and free next if applicable
-        if (currAlloc.thisAlloc == addr)
+        if (curr->thisAlloc == addr)
         {
-            if (currAlloc.nextAlloc)
+            ret = curr->allocSize;
+            if (curr->nextAlloc)
             {
-                alloc* tmp = currAlloc.nextAlloc;
-                this->table[index] = *tmp;
-                smallFree(tmp);
+                alloc* tmp = curr->nextAlloc;
+                tmp->lastAlloc = nullptr;
+                *head = tmp;
             }
             else
             {
-                currAlloc.thisAlloc = nullptr;
-                currAlloc.allocSize = 0;
+                *head = nullptr;
             }
+            smallFree(curr);
             this->size--;
-            return true;
         }
         //if further in list or non-existent, search list
         else
         {
-            while(currAlloc.nextAlloc)
+            while(curr)
             {
-                if (currAlloc.nextAlloc->thisAlloc == addr)
+                if (curr->thisAlloc == addr)
                 {
-                    alloc* tmp = currAlloc.nextAlloc;
-                    currAlloc.nextAlloc = tmp->nextAlloc;
-                    smallFree(tmp);
-                    this->size--;
-                    return true;
+                    ret = curr->allocSize;
+                    curr->lastAlloc->nextAlloc = curr->nextAlloc;
+                    if (curr->nextAlloc)
+                        curr->nextAlloc->lastAlloc = curr->lastAlloc;
+                    this->size--; 
+                    break;
                 }
-                currAlloc = *currAlloc.nextAlloc;
+                curr = curr->nextAlloc;
             }
         }
     }
-    return false;
+    if (ret > 0 && this->cap > MIN_CAP && (this->size/this->cap) < MIN_LOAD)
+        resizeDown();
+    return ret;
 }
 allocMap::~allocMap()
 {
+    alloc** a;
     for (int i = 0; i < cap; i++)
     {
-        alloc* a = this->table + i;
-        if (a->nextAlloc)
+        a = this->table + i;
+        if (*a)
         {
-            allocMap::listDestruct(a->nextAlloc);
+            allocMap::listDestruct(*a);
         }
     }
     munmap(this->table, cap*sizeof(alloc));

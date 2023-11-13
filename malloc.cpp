@@ -27,11 +27,11 @@ void *mmalloc(size_t size)
     // determine which bucket to put allocation in
     if (size <= PAGESIZE/2)
     {
-       largeMalloc(size);
+       ptr = smallMalloc(size);
     }
     else
     {
-        smallMalloc(size);
+        ptr = largeMalloc(size);
     }
     mmalloc_timer.stop();
     return ptr; 
@@ -48,10 +48,6 @@ void mfree(void *ptr)
     }
     mfree_timer.stop();
     return;
-}
-void largeStats()
-{
-    cout << "Large Allocations: " << endl;
 }
 
 void mstats()
